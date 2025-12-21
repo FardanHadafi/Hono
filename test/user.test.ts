@@ -127,3 +127,56 @@ describe("POST /api/users/login", () => {
     expect(body.errors).toBeDefined();
   });
 });
+
+describe("GET /api/users/current", () => {
+  beforeEach(async () => {
+    await UserTest.create();
+  });
+
+  afterEach(async () => {
+    await UserTest.delete();
+  });
+
+  it("should be able to get current user", async () => {
+    const currentUser = await app.request("/api/users/current", {
+      method: "GET",
+      headers: {
+        Authorization: "testtoken",
+      },
+    });
+    const body = await currentUser.json();
+    logger.debug(body);
+
+    expect(currentUser.status).toBe(200);
+    expect(body.data.username).toBe("testuser");
+    expect(body.data.name).toBe("test");
+  });
+
+  it("shouldn't be able to get current user if token is invalid", async () => {
+    const currentUser = await app.request("/api/users/current", {
+      method: "GET",
+      headers: {
+        Authorization: "wrong",
+      },
+    });
+    const body = await currentUser.json();
+    logger.debug(body);
+
+    expect(currentUser.status).toBe(401);
+    expect(body.errors).toBeDefined();
+  });
+
+  it("shouldn't be able to get current user if no Authorization Header", async () => {
+    const currentUser = await app.request("/api/users/current", {
+      method: "GET",
+      headers: {
+        Authorization: "",
+      },
+    });
+    const body = await currentUser.json();
+    logger.debug(body);
+
+    expect(currentUser.status).toBe(400);
+    expect(body.errors).toBeDefined();
+  });
+});
