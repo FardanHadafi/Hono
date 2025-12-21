@@ -62,3 +62,10 @@ userController.patch("/api/users/current", async (c) => {
 
   return c.json({ data: updatedUser });
 });
+
+userController.delete("/api/users/current", async (c) => {
+  const user = c.get("user") as User;
+  const deletedUser = await UserService.logout(user);
+
+  return c.json({ data: deletedUser });
+});

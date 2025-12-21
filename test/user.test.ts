@@ -257,3 +257,51 @@ describe("PATCH /api/users/current", () => {
     expect(response.status).toBe(200);
   });
 });
+
+describe("DELETE /api/users/current", () => {
+  beforeEach(async () => {
+    await UserTest.create();
+  });
+  afterEach(async () => {
+    await UserTest.delete();
+  });
+
+  it("should logout user", async () => {
+    const response = await app.request("/api/users/current", {
+      method: "DELETE",
+      headers: {
+        Authorization: "testtoken",
+      },
+    });
+
+    const body = await response.json();
+    logger.debug(body);
+
+    expect(response.status).toBe(200);
+    expect(body.data).toBe(true);
+  });
+
+  it("shouldn't logout user with invalid token", async () => {
+    let response = await app.request("/api/users/current", {
+      method: "DELETE",
+      headers: {
+        Authorization: "testtoken",
+      },
+    });
+
+    const body = await response.json();
+    logger.debug(body);
+
+    expect(response.status).toBe(200);
+    expect(body.data).toBe(true);
+
+    response = await app.request("/api/users/current", {
+      method: "DELETE",
+      headers: {
+        Authorization: "testtoken",
+      },
+    });
+
+    expect(response.status).toBe(401);
+  });
+});
