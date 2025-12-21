@@ -9,6 +9,7 @@ import {
 import app from "../src";
 import { logger } from "../src/application/logging";
 import { UserTest } from "./test-util";
+import { password } from "bun";
 
 beforeAll(() => {
   const config = require("../prisma.config");
@@ -178,5 +179,81 @@ describe("GET /api/users/current", () => {
 
     expect(currentUser.status).toBe(400);
     expect(body.errors).toBeDefined();
+  });
+});
+
+describe("PATCH /api/users/current", () => {
+  beforeEach(async () => {
+    await UserTest.create();
+  });
+  afterEach(async () => {
+    await UserTest.delete();
+  });
+
+  it("should reject invalid update request", async () => {
+    const response = await app.request("/api/users/current", {
+      method: "PATCH",
+      headers: {
+        Authorization: "testtoken",
+      },
+      body: JSON.stringify({
+        name: "",
+        password: "",
+      }),
+    });
+
+    const body = await response.json();
+    logger.debug(body);
+
+    expect(response.status).toBe(400);
+    expect(body.errors).toBeDefined();
+  });
+
+  it("should update name", async () => {
+    const response = await app.request("/api/users/current", {
+      method: "PATCH",
+      headers: {
+        Authorization: "testtoken",
+      },
+      body: JSON.stringify({
+        name: "updatedname",
+      }),
+    });
+
+    const body = await response.json();
+    logger.debug(body);
+
+    expect(response.status).toBe(200);
+    expect(body.data).toBeDefined();
+    expect(body.data.name).toBe("updatedname");
+  });
+
+  it("should update password and be able to login", async () => {
+    let response = await app.request("/api/users/current", {
+      method: "PATCH",
+      headers: {
+        Authorization: "testtoken",
+      },
+      body: JSON.stringify({
+        password: "newpassword",
+      }),
+    });
+
+    const body = await response.json();
+    logger.debug(body);
+
+    expect(response.status).toBe(200);
+    expect(body.data).toBeDefined();
+    expect(body.data.name).toBe("test");
+
+    response = await app.request("/api/users/login", {
+      method: "POST",
+      body: JSON.stringify({
+        username: "testuser",
+        password: "newpassword",
+      }),
+    });
+
+    expect(response.status).toBe(200);
   });
 });

@@ -4,6 +4,7 @@ import {
   LoginUserRequest,
   RegisterUserRequest,
   toUserResponse,
+  UpdateUserRequest,
   UserResponse,
 } from "../model/user-model";
 import { UserValidation } from "../validation/user-validation";
@@ -98,5 +99,42 @@ export class UserService {
     }
 
     return user;
+  }
+
+  static async update(
+    user: User,
+    request: UpdateUserRequest
+  ): Promise<UserResponse> {
+    // Validate the request
+    const validatedUpdate = UserValidation.UPDATE.parse(
+      request
+    ) as UpdateUserRequest;
+
+    const dataUpToUpdate: Partial<User> = {};
+
+    // If name is provided, update it
+    if (validatedUpdate.name) {
+      dataUpToUpdate.name = validatedUpdate.name;
+    }
+
+    // If password is provided, hash and update it
+    if (validatedUpdate.password) {
+      dataUpToUpdate.password = await Bun.password.hash(
+        validatedUpdate.password,
+        {
+          algorithm: "bcrypt",
+          cost: 10,
+        }
+      );
+    }
+
+    // Update the user in the database
+    const updatedUser = await prismaClient.user.update({
+      where: { username: user.username },
+      data: dataUpToUpdate,
+    });
+
+    // Return the updated user response
+    return toUserResponse(updatedUser);
   }
 }
