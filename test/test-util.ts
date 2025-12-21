@@ -6,7 +6,7 @@ export class UserTest {
       data: {
         username: "testuser",
         name: "test",
-        password: await Bun.password.hash("testpassword", {
+        password: await Bun.password.hash("test12", {
           algorithm: "bcrypt",
           cost: 10,
         }),

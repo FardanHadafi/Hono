@@ -1,4 +1,11 @@
-import { describe, it, expect, beforeAll, afterEach } from "bun:test";
+import {
+  describe,
+  it,
+  expect,
+  beforeAll,
+  afterEach,
+  beforeEach,
+} from "bun:test";
 import app from "../src";
 import { logger } from "../src/application/logging";
 import { UserTest } from "./test-util";
@@ -51,7 +58,7 @@ describe("POST /api/users", () => {
     const response = await app.request("/api/users", {
       method: "POST",
       body: JSON.stringify({
-        username: "test",
+        username: "testuser",
         password: "test12",
         name: "test",
       }),
@@ -61,7 +68,62 @@ describe("POST /api/users", () => {
 
     expect(response.status).toBe(200);
     expect(body.data).toBeDefined();
-    expect(body.data.username).toBe("test");
+    expect(body.data.username).toBe("testuser");
     expect(body.data.name).toBe("test");
+  });
+});
+
+describe("POST /api/users/login", () => {
+  beforeEach(async () => {
+    await UserTest.create();
+  });
+
+  afterEach(async () => {
+    await UserTest.delete();
+  });
+
+  it("should be able to login", async () => {
+    const response = await app.request("/api/users/login", {
+      method: "POST",
+      body: JSON.stringify({
+        username: "testuser",
+        password: "test12",
+      }),
+    });
+    const body = await response.json();
+    logger.debug(body);
+
+    expect(response.status).toBe(200);
+    expect(body.data.token).toBeDefined();
+  });
+
+  it("shouldn't be able to login if username is wrong", async () => {
+    const response = await app.request("/api/users/login", {
+      method: "POST",
+      body: JSON.stringify({
+        username: "wrong",
+        password: "test12",
+      }),
+    });
+    const body = await response.json();
+    logger.debug(body);
+
+    expect(response.status).toBe(400);
+    expect(body.errors).toBeDefined();
+  });
+
+  it("shouldn't be able to login if password is wrong", async () => {
+    const response = await app.request("/api/users/login", {
+      method: "POST",
+      body: JSON.stringify({
+        username: "testuser",
+        password: "wrongpassword",
+      }),
+    });
+    const body = await response.json();
+    logger.debug(body);
+
+    expect(response.status).toBe(400);
+    expect(body.errors).toBeDefined();
   });
 });
