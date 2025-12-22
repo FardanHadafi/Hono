@@ -1,3 +1,4 @@
+import { Contact } from "@prisma/client";
 import { prismaClient } from "../src/application/database";
 
 export class UserTest {
@@ -45,7 +46,21 @@ export class ContactTest {
     });
   }
 
-  static async get() {
+  static async createMany(n: number) {
+    for (let i = 0; i < n; i++) {
+      await prismaClient.contact.create({
+        data: {
+          first_name: `John${i}`,
+          last_name: `Doe${i}`,
+          email: `test${i}@example.com`,
+          phone: `12345678${i.toString().padStart(2, "0")}`,
+          username: "testuser",
+        },
+      });
+    }
+  }
+
+  static async get(): Promise<Contact> {
     return prismaClient.contact.findFirstOrThrow({
       where: {
         username: "testuser",

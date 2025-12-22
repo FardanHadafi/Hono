@@ -112,7 +112,7 @@ Request Header:
 
 Query Parameter:
 
-- name: search for name
+- name: search for first_name or last_name
 - email: search for email
 - phone: search for phone
 - page: 1

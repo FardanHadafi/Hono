@@ -243,3 +243,181 @@ describe("DELETE /api/contacts/:idContact", () => {
     expect(body.data).toBe(true);
   });
 });
+
+describe("GET /api/contacts", () => {
+  beforeEach(async () => {
+    await ContactTest.deleteAll();
+    await UserTest.create();
+    await ContactTest.createMany(25);
+  });
+
+  afterEach(async () => {
+    await ContactTest.deleteAll();
+    await UserTest.delete();
+  });
+
+  it("Should be able to search contacts", async () => {
+    const response = await app.request("/api/contacts", {
+      method: "GET",
+      headers: {
+        Authorization: "testtoken",
+      },
+    });
+    const body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.data.length).toBe(10);
+    expect(body.paging.current_page).toBe(1);
+    expect(body.paging.size).toBe(10);
+    expect(body.paging.total_page).toBe(3);
+  });
+
+  it("Should be able to search contacts with name", async () => {
+    // Search for "John" (4 chars - meets min 3 requirement)
+    let response = await app.request("/api/contacts?name=John", {
+      method: "GET",
+      headers: {
+        Authorization: "testtoken",
+      },
+    });
+    let body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.data.length).toBe(10);
+    expect(body.paging.current_page).toBe(1);
+    expect(body.paging.size).toBe(10);
+    expect(body.paging.total_page).toBe(3);
+
+    // Search for "Doe" (3 chars - meets min 3 requirement)
+    response = await app.request("/api/contacts?name=Doe", {
+      method: "GET",
+      headers: {
+        Authorization: "testtoken",
+      },
+    });
+    body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.data.length).toBe(10);
+    expect(body.paging.current_page).toBe(1);
+    expect(body.paging.size).toBe(10);
+    expect(body.paging.total_page).toBe(3);
+  });
+
+  it("Should be able to search contacts with email", async () => {
+    // Must use VALID email format - not partial strings
+    let response = await app.request("/api/contacts?email=test0@example.com", {
+      method: "GET",
+      headers: {
+        Authorization: "testtoken",
+      },
+    });
+    let body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.data.length).toBe(1); // Should match only test0@example.com
+    expect(body.paging.current_page).toBe(1);
+    expect(body.paging.size).toBe(10);
+    expect(body.paging.total_page).toBe(1);
+  });
+
+  it("Should be able to search contacts with phone", async () => {
+    // Phone must be at least 7 characters
+    let response = await app.request("/api/contacts?phone=1234567800", {
+      method: "GET",
+      headers: {
+        Authorization: "testtoken",
+      },
+    });
+    let body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.data.length).toBe(1); // Should match contact with phone 1234567800
+    expect(body.paging.current_page).toBe(1);
+    expect(body.paging.size).toBe(10);
+    expect(body.paging.total_page).toBe(1);
+  });
+
+  it("Should be able to search contacts without result", async () => {
+    // Name must be at least 3 characters
+    let response = await app.request("/api/contacts?name=Connor", {
+      method: "GET",
+      headers: {
+        Authorization: "testtoken",
+      },
+    });
+    let body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.data.length).toBe(0);
+    expect(body.paging.current_page).toBe(1);
+    expect(body.paging.size).toBe(10);
+    expect(body.paging.total_page).toBe(0);
+
+    // Email must be valid email format
+    response = await app.request("/api/contacts?email=wrong@nowhere.com", {
+      method: "GET",
+      headers: {
+        Authorization: "testtoken",
+      },
+    });
+    body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.data.length).toBe(0);
+    expect(body.paging.current_page).toBe(1);
+    expect(body.paging.size).toBe(10);
+    expect(body.paging.total_page).toBe(0);
+
+    // Phone must be at least 7 characters
+    response = await app.request("/api/contacts?phone=9999999", {
+      method: "GET",
+      headers: {
+        Authorization: "testtoken",
+      },
+    });
+    body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.data.length).toBe(0);
+    expect(body.paging.current_page).toBe(1);
+    expect(body.paging.size).toBe(10);
+    expect(body.paging.total_page).toBe(0);
+  });
+
+  it("Should be able to search contacts with paging", async () => {
+    // Test page 1
+    let response = await app.request("/api/contacts?page=1&size=10", {
+      method: "GET",
+      headers: {
+        Authorization: "testtoken",
+      },
+    });
+    let body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.data.length).toBe(10);
+    expect(body.paging.current_page).toBe(1);
+    expect(body.paging.size).toBe(10);
+    expect(body.paging.total_page).toBe(3);
+
+    // Test page 2
+    response = await app.request("/api/contacts?page=2&size=10", {
+      method: "GET",
+      headers: {
+        Authorization: "testtoken",
+      },
+    });
+    body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.data.length).toBe(10);
+    expect(body.paging.current_page).toBe(2);
+    expect(body.paging.size).toBe(10);
+    expect(body.paging.total_page).toBe(3);
+
+    // Test page 3 (last page with 5 items)
+    response = await app.request("/api/contacts?page=3&size=10", {
+      method: "GET",
+      headers: {
+        Authorization: "testtoken",
+      },
+    });
+    body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.data.length).toBe(5);
+    expect(body.paging.current_page).toBe(3);
+    expect(body.paging.size).toBe(10);
+    expect(body.paging.total_page).toBe(3);
+  });
+});
