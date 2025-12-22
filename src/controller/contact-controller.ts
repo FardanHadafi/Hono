@@ -41,3 +41,12 @@ contactController.put("/api/contacts/:idContact", async (c) => {
     data: response,
   });
 });
+
+contactController.delete("/api/contacts/:idContact", async (c) => {
+  const user = c.get("user") as User;
+  const contactId = Number(c.req.param("idContact"));
+  const response = await ContactService.delete(user, contactId);
+  return c.json({
+    data: response,
+  });
+});

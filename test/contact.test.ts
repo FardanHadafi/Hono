@@ -205,3 +205,41 @@ describe("PUT /api/contacts/:idContact", () => {
     expect(body.data.phone).toBe("1234567890");
   });
 });
+
+describe("DELETE /api/contacts/:idContact", () => {
+  beforeEach(async () => {
+    await ContactTest.deleteAll();
+    await UserTest.create();
+    await ContactTest.create();
+  });
+  afterEach(async () => {
+    await ContactTest.deleteAll();
+    await UserTest.delete();
+  });
+
+  it("Should get 404 if contactId not found", async () => {
+    const contact = await ContactTest.get();
+    const response = await app.request("/api/contacts/" + (contact.id + 1), {
+      method: "DELETE",
+      headers: {
+        Authorization: "testtoken",
+      },
+    });
+    const body = await response.json();
+    expect(response.status).toBe(404);
+    expect(body.errors).toBeDefined();
+  });
+
+  it("Should delete contact successfully", async () => {
+    const contact = await ContactTest.get();
+    const response = await app.request("/api/contacts/" + contact.id, {
+      method: "DELETE",
+      headers: {
+        Authorization: "testtoken",
+      },
+    });
+    const body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.data).toBe(true);
+  });
+});
