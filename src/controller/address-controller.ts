@@ -1,5 +1,8 @@
 import { authMiddleware } from "../middleware/auth-middleware";
-import { CreateAddressRequest } from "../model/address-model";
+import {
+  CreateAddressRequest,
+  GetAddressRequest,
+} from "../model/address-model";
 import { AddressService } from "../service/address-service";
 import { ApplicationVariables } from "./../model/app-model";
 import { Hono } from "hono";
@@ -19,3 +22,18 @@ addressController.post("/api/contacts/:idContact/addresses", async (c) => {
     data: response,
   });
 });
+
+addressController.get(
+  "/api/contacts/:idContact/addresses/:idAddress",
+  async (c) => {
+    const user = c.get("user");
+    const request: GetAddressRequest = {
+      contact_id: Number(c.req.param("idContact")),
+      id: Number(c.req.param("idAddress")),
+    };
+    const response = await AddressService.get(user, request);
+    return c.json({
+      data: response,
+    });
+  }
+);

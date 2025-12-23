@@ -90,3 +90,63 @@ describe("POST /api/contacts/:idContact", () => {
     expect(body.data.postal_code).toBe("666666");
   });
 });
+
+describe("GET /api/contacts/:idContact/addresses/:idAddress", () => {
+  beforeEach(async () => {
+    await AddressTest.deleteAll();
+    await ContactTest.deleteAll();
+    await UserTest.delete();
+
+    await UserTest.create();
+    await ContactTest.create();
+    await AddressTest.create();
+  });
+
+  afterEach(async () => {
+    await AddressTest.deleteAll();
+    await ContactTest.deleteAll();
+    await UserTest.delete();
+  });
+
+  it("Should rejected if address not found", async () => {
+    const contact = await ContactTest.get();
+    const address = await AddressTest.get();
+    const response = await app.request(
+      "/api/contacts/" + contact.id + "/addresses/" + (address.id + 1),
+      {
+        method: "GET",
+        headers: {
+          Authorization: "testtoken",
+        },
+      }
+    );
+
+    const body = await response.json();
+    expect(response.status).toBe(404);
+    expect(body.errors).toBeDefined();
+  });
+
+  it("Should success if address found", async () => {
+    const contact = await ContactTest.get();
+    const address = await AddressTest.get();
+    const response = await app.request(
+      "/api/contacts/" + contact.id + "/addresses/" + address.id,
+      {
+        method: "GET",
+        headers: {
+          Authorization: "testtoken",
+        },
+      }
+    );
+
+    const body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.data).toBeDefined();
+    expect(body.data.id).toBeDefined();
+    expect(body.data.street).toBe(address.street);
+    expect(body.data.city).toBe(address.city);
+    expect(body.data.province).toBe(address.province);
+    expect(body.data.country).toBe(address.country);
+    expect(body.data.postal_code).toBe(address.postal_code);
+  });
+});
