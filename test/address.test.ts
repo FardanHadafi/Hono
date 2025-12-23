@@ -150,3 +150,96 @@ describe("GET /api/contacts/:idContact/addresses/:idAddress", () => {
     expect(body.data.postal_code).toBe(address.postal_code);
   });
 });
+
+describe("PUT /api/contacts/:idContact/addresses/:idAddress", () => {
+  beforeEach(async () => {
+    await AddressTest.deleteAll();
+    await ContactTest.deleteAll();
+    await UserTest.delete();
+
+    await UserTest.create();
+    await ContactTest.create();
+    await AddressTest.create();
+  });
+
+  afterEach(async () => {
+    await AddressTest.deleteAll();
+    await ContactTest.deleteAll();
+    await UserTest.delete();
+  });
+
+  it("Should reject if request invalid", async () => {
+    const contact = await ContactTest.get();
+    const address = await AddressTest.get();
+    const response = await app.request(
+      "/api/contacts/" + contact.id + "/addresses/" + address.id,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: "testtoken",
+        },
+        body: JSON.stringify({
+          country: "",
+          postal_code: "",
+        }),
+      }
+    );
+
+    const body = await response.json();
+    expect(response.status).toBe(400);
+    expect(body.errors).toBeDefined();
+  });
+
+  it("Should reject if address not found", async () => {
+    const contact = await ContactTest.get();
+    const address = await AddressTest.get();
+    const response = await app.request(
+      "/api/contacts/" + contact.id + "/addresses/" + (address.id + 1),
+      {
+        method: "PUT",
+        headers: {
+          Authorization: "testtoken",
+        },
+        body: JSON.stringify({
+          country: "America",
+          postal_code: "666666",
+        }),
+      }
+    );
+
+    const body = await response.json();
+    expect(response.status).toBe(404);
+    expect(body.errors).toBeDefined();
+  });
+
+  it("Should success if request valid", async () => {
+    const contact = await ContactTest.get();
+    const address = await AddressTest.get();
+    const response = await app.request(
+      "/api/contacts/" + contact.id + "/addresses/" + address.id,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: "testtoken",
+        },
+        body: JSON.stringify({
+          street: "Jalan Sesama",
+          city: "Gotham",
+          province: "Province",
+          country: "Wakanda",
+          postal_code: "999999",
+        }),
+      }
+    );
+
+    const body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.data).toBeDefined();
+    expect(body.data.id).toBeDefined();
+    expect(body.data.street).toBe("Jalan Sesama");
+    expect(body.data.city).toBe("Gotham");
+    expect(body.data.province).toBe("Province");
+    expect(body.data.country).toBe("Wakanda");
+    expect(body.data.postal_code).toBe("999999");
+  });
+});

@@ -2,6 +2,7 @@ import { authMiddleware } from "../middleware/auth-middleware";
 import {
   CreateAddressRequest,
   GetAddressRequest,
+  UpdateAddressRequest,
 } from "../model/address-model";
 import { AddressService } from "../service/address-service";
 import { ApplicationVariables } from "./../model/app-model";
@@ -32,6 +33,22 @@ addressController.get(
       id: Number(c.req.param("idAddress")),
     };
     const response = await AddressService.get(user, request);
+    return c.json({
+      data: response,
+    });
+  }
+);
+
+addressController.put(
+  "/api/contacts/:idContact/addresses/:idAddress",
+  async (c) => {
+    const user = c.get("user");
+    const contactId = Number(c.req.param("idContact"));
+    const addressId = Number(c.req.param("idAddress"));
+    const request = (await c.req.json()) as UpdateAddressRequest;
+    request.contact_id = contactId;
+    request.id = addressId;
+    const response = await AddressService.update(user, request);
     return c.json({
       data: response,
     });
