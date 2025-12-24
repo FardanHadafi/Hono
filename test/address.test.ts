@@ -297,3 +297,63 @@ describe("DELETE /api/contacts/:idContact/addresses/:idAddress", () => {
     expect(body.data).toBeTrue();
   });
 });
+
+describe("DELETE /api/contacts/:idContact/addresses/:idAddress", () => {
+  beforeEach(async () => {
+    await AddressTest.deleteAll();
+    await ContactTest.deleteAll();
+    await UserTest.delete();
+
+    await UserTest.create();
+    await ContactTest.create();
+    await AddressTest.create();
+  });
+
+  afterEach(async () => {
+    await AddressTest.deleteAll();
+    await ContactTest.deleteAll();
+    await UserTest.delete();
+  });
+
+  it("Should failed if contact not found", async () => {
+    const contact = await ContactTest.get();
+    const address = await AddressTest.get();
+    const response = await app.request(
+      "/api/contacts/" + (contact.id + 1) + "/addresses",
+      {
+        method: "GET",
+        headers: {
+          Authorization: "testtoken",
+        },
+      }
+    );
+
+    const body = await response.json();
+    expect(response.status).toBe(404);
+    expect(body.errors).toBeDefined();
+  });
+
+  it("Should failed if contact found", async () => {
+    const contact = await ContactTest.get();
+    const address = await AddressTest.get();
+    const response = await app.request(
+      "/api/contacts/" + contact.id + "/addresses",
+      {
+        method: "GET",
+        headers: {
+          Authorization: "testtoken",
+        },
+      }
+    );
+
+    const body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.data).toBeDefined();
+    expect(body.data.length).toBe(1);
+    expect(body.data[0].street).toBe(address.street);
+    expect(body.data[0].city).toBe(address.city);
+    expect(body.data[0].province).toBe(address.province);
+    expect(body.data[0].country).toBe(address.country);
+    expect(body.data[0].postal_code).toBe(address.postal_code);
+  });
+});

@@ -1,4 +1,7 @@
-import { RemoveAddressRequest } from "./../model/address-model";
+import {
+  ListAddressRequest,
+  RemoveAddressRequest,
+} from "./../model/address-model";
 import { authMiddleware } from "../middleware/auth-middleware";
 import {
   CreateAddressRequest,
@@ -70,3 +73,14 @@ addressController.delete(
     });
   }
 );
+
+addressController.get("/api/contacts/:idContact/addresses", async (c) => {
+  const user = c.get("user");
+  const request: ListAddressRequest = {
+    contact_id: Number(c.req.param("idContact")),
+  };
+  const response = await AddressService.list(user, request);
+  return c.json({
+    data: response,
+  });
+});
