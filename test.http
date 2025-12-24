@@ -1,0 +1,133 @@
+### Register User
+POST http://localhost:3000/api/users
+Content-Type: application/json
+Accept: application/json
+
+{
+  "username": "testusername1",
+  "name": "testname1",
+  "password": "testpassword1"
+}
+
+### Login User
+POST http://localhost:3000/api/users/login
+Content-Type: application/json
+Accept: application/json
+
+{
+  "username": "testusername1",
+  "password": "testpassword1"
+}
+
+### Get Current User
+GET  http://localhost:3000/api/users/current
+Content-Type: application/json
+Accept: application/json
+Authorization: 3f10f944-8fb1-43f5-a436-dbc2d670ce2e
+
+### Update Current User
+PATCH  http://localhost:3000/api/users/current
+Content-Type: application/json
+Accept: application/json
+Authorization: 3f10f944-8fb1-43f5-a436-dbc2d670ce2e
+
+{
+  "name": "updatedusername",
+  "password": "updatedpasword"
+}
+
+### Logout Current User
+DELETE http://localhost:3000/api/users/current
+Content-Type: application/json
+Accept: application/json
+Authorization: 3f10f944-8fb1-43f5-a436-dbc2d670ce2e
+
+### Create Contact
+POST http://localhost:3000/api/contacts
+Content-Type: application/json
+Accept: application/json
+Authorization: 3f10f944-8fb1-43f5-a436-dbc2d670ce2e
+
+{
+  "first_name": "testcontact2",
+  "lastname": "lastname",
+  "email": "testcontact1@yahoo.com",
+  "phone": "081212121212"
+}
+
+### Search Contact
+GET  http://localhost:3000/api/contacts
+Content-Type: application/json
+Accept: application/json
+Authorization: 3f10f944-8fb1-43f5-a436-dbc2d670ce2e
+
+### Detail Contact
+GET  http://localhost:3000/api/contacts/2300
+Content-Type: application/json
+Accept: application/json
+Authorization: 3f10f944-8fb1-43f5-a436-dbc2d670ce2e
+
+### Update Contact
+PUT  http://localhost:3000/api/contacts/2300
+Content-Type: application/json
+Accept: application/json
+Authorization: 3f10f944-8fb1-43f5-a436-dbc2d670ce2e
+
+{
+  "first_name": "testcontact2",
+    "last_name": "testlastname",
+    "email": "testcontact1@yahoo.com",
+    "phone": "081212121212"
+}
+
+### Delete Contact
+DELETE http://localhost:3000/api/contacts/2299
+Content-Type: application/json
+Accept: application/json
+Authorization: 3f10f944-8fb1-43f5-a436-dbc2d670ce2e
+
+### Create Address
+POST http://localhost:3000/api/contacts/2300/addresses
+Content-Type: application/json
+Accept: application/json
+Authorization: 3f10f944-8fb1-43f5-a436-dbc2d670ce2e
+
+{
+  "street": "Jalan Sesame",
+  "city": "Gotham",
+  "province": "Province",
+  "country": "Wakanda",
+  "postal_code": "666666"
+}
+
+### List Address
+GET http://localhost:3000/api/contacts/2300/addresses
+Content-Type: application/json
+Accept: application/json
+Authorization: 3f10f944-8fb1-43f5-a436-dbc2d670ce2e
+
+### Detail Address
+GET http://localhost:3000/api/contacts/2300/addresses/89
+Content-Type: application/json
+Accept: application/json
+Authorization: 3f10f944-8fb1-43f5-a436-dbc2d670ce2e
+
+### Update Address
+PUT http://localhost:3000/api/contacts/2300/addresses/88
+Content-Type: application/json
+Accept: application/json
+Authorization: 3f10f944-8fb1-43f5-a436-dbc2d670ce2e
+
+  {
+  "street": "Jalan Bersama",
+  "city": "Central City",
+  "province": "Cirebon",
+  "country": "Konoha",
+  "postal_code": "999999"
+}
+
+### Delete Address
+DELETE http://localhost:3000/api/contacts/2300/addresses/89
+Content-Type: application/json
+Accept: application/json
+Authorization: 3f10f944-8fb1-43f5-a436-dbc2d670ce2e
