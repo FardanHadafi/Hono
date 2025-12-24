@@ -1,3 +1,4 @@
+import { RemoveAddressRequest } from "./../model/address-model";
 import { authMiddleware } from "../middleware/auth-middleware";
 import {
   CreateAddressRequest,
@@ -49,6 +50,21 @@ addressController.put(
     request.contact_id = contactId;
     request.id = addressId;
     const response = await AddressService.update(user, request);
+    return c.json({
+      data: response,
+    });
+  }
+);
+
+addressController.delete(
+  "/api/contacts/:idContact/addresses/:idAddress",
+  async (c) => {
+    const user = c.get("user");
+    const request: RemoveAddressRequest = {
+      id: Number(c.req.param("idAddress")),
+      contact_id: Number(c.req.param("idContact")),
+    };
+    const response = await AddressService.remove(user, request);
     return c.json({
       data: response,
     });
